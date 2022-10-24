@@ -44,6 +44,29 @@ exports.adminDeleteUser = async (req, res, next) => {
 	}
 };
 
+exports.adminUpdateUser = async (req, res, next) => {
+	try {
+		const user_id = req.params.id;
+		const user = await User.findByIdAndUpdate({ _id: user_id }, req.body, {
+			new: true,
+		});
+		if (!user) {
+			return next(new CustomError("Failed to Update", 401));
+		}
+
+		res.status(200).json({
+			success: true,
+			user: user,
+		});
+	} catch (error) {
+		console.log(error);
+		res.status(404).json({
+			error: true,
+			message: error.stack,
+		});
+	}
+};
+
 //user routes
 exports.signUp = async (req, res, next) => {
 	try {
@@ -103,17 +126,58 @@ exports.login = async (req, res, next) => {
 
 exports.updateUser = async (req, res, next) => {
 	try {
-		const user_id = req.params.id;
-		const user = await User.findByIdAndUpdate({ _id: user_id }, req.body, {
-			new: true,
-		});
+		const _id = req.user._id;
+
+		const user = await User.findByIdAndUpdate({ _id }, req.body, { new: true });
+
 		if (!user) {
-			return next(new CustomError("Failed to Update", 401));
+			return next(new CustomError("No user found Sorry", 401));
 		}
 
 		res.status(200).json({
 			success: true,
-			user: user,
+			user,
+		});
+	} catch (error) {
+		console.log(error);
+		res.status(404).json({
+			error: true,
+			message: error.stack,
+		});
+	}
+};
+
+exports.logout = async (req, res, next) => {
+	try {
+		res.cookie("token", null, {
+			expires: new Date(Date.now()),
+			httpOnly: true,
+		});
+
+		res.status(200).json({
+			success: true,
+			message: "Logout Success",
+		});
+	} catch (error) {
+		console.log(error);
+		res.status(404).json({
+			error: true,
+			message: error.stack,
+		});
+	}
+};
+
+exports.getDetail = async (req, res, next) => {
+	try {
+		const _id = req.user._id;
+		const user = await User.findById({ _id });
+		if (!user) {
+			return next(new CustomError("Unable to fetch Data", 402));
+		}
+
+		res.status(201).json({
+			success: true,
+			user,
 		});
 	} catch (error) {
 		console.log(error);

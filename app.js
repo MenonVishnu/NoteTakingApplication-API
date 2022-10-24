@@ -13,8 +13,10 @@ app.use(cookieParser());
 
 //routes
 const user = require("./routes/userRoutes");
+const notes = require("./routes/noteRoutes");
 
 app.use("/api/v1", user);
+app.use("/api/v1", notes);
 
 app.get("/", (req, res) => {
 	res.status(200).send("Hello BYE BYE");
